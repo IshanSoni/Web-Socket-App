@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO test</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/node_modules/mediaelement/build/mediaelement-and-player.min.js"></script>
+    <link rel="stylesheet" href="/node_modules/mediaelement/build/mediaelementplayer.min.css" />
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <video id="test" class="mejs__player" width="320" height="240">
+        <source type="video/mp4" src="myvideo.mp4" />
+    </video>
+
+    <script>
+        var player = new MediaElement('test');
+
+        $(function () {
+            var socket = io();
+            var timeBar = document.getElementsByClassName('mejs__time-slider')[0];
+
+            player.addEventListener('pause', function () {
+                socket.emit('play-pause-video', false);
+            });
+            player.addEventListener('playing', function () {
+                socket.emit('play-pause-video', true);
+            });
+            timeBar.addEventListener('click', function () {
+                socket.emit('update-time', player.getCurrentTime());
+            });
+
+            socket.on('play-pause-video', function (curPlay) {
+                if (curPlay) player.play();
+                else player.pause();
+            });
+            socket.on('update-time', function (curTime) {
+                player.setCurrentTime(curTime);
+            });
+        });
+    </script>
+</body>
+
+</html>
